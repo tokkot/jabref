@@ -17,7 +17,6 @@ import javax.swing.*;
 
 import java.awt.*;
 import java.io.StringReader;
-import java.net.URI;
 import java.util.*;
 import java.util.List;
 
