@@ -207,7 +207,6 @@ public class JabRefFrame extends JFrame implements OutputPrinter {
     private final AbstractAction selectKeys = new SelectKeysAction();
     private final AbstractAction newDatabaseAction = new NewDatabaseAction(this);
     private final AbstractAction newSubDatabaseAction = new NewSubDatabaseAction(this);
-    private final AbstractAction integrityCheckAction = new IntegrityCheckAction(this);
     private final AbstractAction forkMeOnGitHubAction = new ForkMeOnGitHubAction();
     private final AbstractAction help = new HelpAction("JabRef help", helpDiag,
             GUIGlobals.baseFrameHelp, Localization.lang("JabRef help"),
@@ -1360,7 +1359,6 @@ public class JabRefFrame extends JFrame implements OutputPrinter {
         tools.addSeparator();
         checkAndFix.add(autoSetPdf);
         checkAndFix.add(autoSetPs);
-        checkAndFix.add(integrityCheckAction);
         tools.add(checkAndFix);
 
         mb.add(tools);
@@ -1574,7 +1572,7 @@ public class JabRefFrame extends JFrame implements OutputPrinter {
                  * openInspire */
                 openPdf, openUrl, openFolder, openFile, openSpires, /*openInspire,*/togglePreview, dupliCheck, /*strictDupliCheck,*/highlightAll,
                 highlightAny, newEntryAction, plainTextImport, massSetField, manageKeywords,
-                closeDatabaseAction, switchPreview, integrityCheckAction, autoSetPdf, autoSetPs,
+                closeDatabaseAction, switchPreview, autoSetPdf, autoSetPs,
                 toggleHighlightAny, toggleHighlightAll, databaseProperties, abbreviateIso,
                 abbreviateMedline, unabbreviate, exportAll, exportSelected,
                 importCurrent, saveAll, dbConnect, dbExport, focusTable));
