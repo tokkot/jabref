@@ -22,7 +22,7 @@ public class IconTheme {
     static {
         try {
             FONT = Font.createFont(Font.TRUETYPE_FONT, FontBasedIcon.class.getResourceAsStream("/fonts/fontawesome-webfont.ttf"));
-            FONT_16 = FONT.deriveFont(16f);
+            FONT_16 = FONT.deriveFont(Font.PLAIN, 16f);
         } catch (FontFormatException | IOException e) {
             // PROBLEM!
             e.printStackTrace();
@@ -32,8 +32,13 @@ public class IconTheme {
     public enum JabRefIcon {
 
         ADD("\uf067", Color.GREEN),
+        CLIPBOARD("\uf0ea"),
         FOLDER("\uf07b"),
-        REMOVE("\uf068", Color.RED);
+        REMOVE("\uf068", Color.RED),
+        FILE("\uf0f6"),
+        PDF_FILE("\uf1c1"),
+        SEARCH("\uf002"),
+        TAGS("\uf02c");
 
         private final String code;
         private final Color color;
@@ -108,6 +113,11 @@ public class IconTheme {
         @Override
         public void paintIcon(Component c, Graphics g, int x, int y) {
             Graphics2D g2 = (Graphics2D) g.create();
+
+            RenderingHints rh = new RenderingHints(
+                    RenderingHints.KEY_TEXT_ANTIALIASING,
+                    RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g2.setRenderingHints(rh);
 
             g2.setFont(FONT_16);
             g2.setColor(iconColor);
