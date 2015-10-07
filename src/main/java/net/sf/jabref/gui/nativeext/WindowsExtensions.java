@@ -37,7 +37,7 @@ public class WindowsExtensions {
      */
     public static void enablePinToTaskbar() {
         if(supportsPinToTaskbar()) {
-            setCurrentProcessExplicitAppUserModelID("JabRef." + Globals.BUILD_INFO.getVersion());
+            //setCurrentProcessExplicitAppUserModelID("JabRef." + Globals.BUILD_INFO.getVersion());
         } else {
             LOGGER.info("Does not support pin to taskbar.");
         }
