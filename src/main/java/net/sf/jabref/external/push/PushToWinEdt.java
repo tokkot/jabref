@@ -13,13 +13,14 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-package net.sf.jabref.external;
+package net.sf.jabref.external.push;
 
 import java.io.IOException;
 
 import javax.swing.*;
 
 import net.sf.jabref.*;
+
 import com.jgoodies.forms.builder.FormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 import net.sf.jabref.gui.BasePanel;
@@ -29,26 +30,23 @@ import net.sf.jabref.logic.l10n.Localization;
 import net.sf.jabref.model.database.BibtexDatabase;
 import net.sf.jabref.model.entry.BibtexEntry;
 
-/**
- * Class for pushing entries into LatexEditor.
- */
-public class PushToLatexEditor implements PushToApplication {
+public class PushToWinEdt implements PushToApplication {
 
     private boolean couldNotCall;
     private boolean notDefined;
     private JPanel settings;
-    private final JTextField ledPath = new JTextField(30);
+    private final JTextField winEdtPath = new JTextField(30);
     private final JTextField citeCommand = new JTextField(30);
 
 
     @Override
     public String getName() {
-        return Localization.lang("Insert selected citations into %0" ,getApplicationName());
+        return Localization.lang("Insert selected citations into %0", getApplicationName());
     }
 
     @Override
     public String getApplicationName() {
-        return "LatexEditor";
+        return "WinEdt";
     }
 
     @Override
@@ -58,12 +56,12 @@ public class PushToLatexEditor implements PushToApplication {
 
     @Override
     public Icon getIcon() {
-        return IconTheme.getImage("edit");
+        return IconTheme.getImage("winedt");
     }
 
     @Override
     public String getKeyStrokeName() {
-        return null;
+        return "Push to WinEdt";
     }
 
     @Override
@@ -72,39 +70,37 @@ public class PushToLatexEditor implements PushToApplication {
         couldNotCall = false;
         notDefined = false;
 
-        String led = Globals.prefs.get(JabRefPreferences.LATEX_EDITOR_PATH);
-
-        if (led == null || led.trim().isEmpty()) {
+        String winEdt = Globals.prefs.get(JabRefPreferences.WIN_EDT_PATH);
+        if (winEdt == null || winEdt.trim().isEmpty()) {
             notDefined = true;
             return;
         }
 
         try {
-            Runtime.getRuntime().exec(led + " " + "-i " + Globals.prefs.get(JabRefPreferences.CITE_COMMAND_LED) + "{" + keyString + "}");
-
+            Runtime.getRuntime().exec(new String[] {winEdt, "\"[InsText('" + Globals.prefs.get(JabRefPreferences.CITE_COMMAND_WIN_EDT) + "{" + keyString.replaceAll("'", "''") + "}');]\""});
         }
 
         catch (IOException excep) {
             couldNotCall = true;
             excep.printStackTrace();
         }
+
     }
 
     @Override
     public void operationCompleted(BasePanel panel) {
         if (notDefined) {
             // @formatter:off
-            panel.output(Localization.lang("Error") + ": " +
-                    Localization.lang("Path to %0 not defined", getApplicationName()) + ".");
+            panel.output(Localization.lang("Error") + ": "
+                    + Localization.lang("Path to %0 not defined", getApplicationName()) + ".");
             // @formatter:on
         } else if (couldNotCall) {
             // @formatter:off
-            panel.output(Localization.lang("Error") + ": " + 
-                    Localization.lang("Could not call executable") + " '"
-                    + Globals.prefs.get(JabRefPreferences.LATEX_EDITOR_PATH) + "'.");
+            panel.output(Localization.lang("Error") + ": "
+                    + Localization.lang("Could not call executable") + " '" + Globals.prefs.get(JabRefPreferences.WIN_EDT_PATH) + "'.");
             // @formatter:on
         } else {
-            Localization.lang("Pushed citations to %0", "LatexEditor");
+            Localization.lang("Pushed citations to %0", getApplicationName());
         }
     }
 
@@ -118,28 +114,28 @@ public class PushToLatexEditor implements PushToApplication {
         if (settings == null) {
             initSettingsPanel();
         }
-        ledPath.setText(Globals.prefs.get(JabRefPreferences.LATEX_EDITOR_PATH));
-        citeCommand.setText(Globals.prefs.get(JabRefPreferences.CITE_COMMAND_LED));
+        winEdtPath.setText(Globals.prefs.get(JabRefPreferences.WIN_EDT_PATH));
+        citeCommand.setText(Globals.prefs.get(JabRefPreferences.CITE_COMMAND_WIN_EDT));
         return settings;
     }
 
     private void initSettingsPanel() {
         FormBuilder builder = FormBuilder.create();
         builder.layout(new FormLayout("left:pref, 4dlu, fill:pref:grow, 4dlu, fill:pref", "p, 2dlu, p"));
-        builder.add(Localization.lang("Path to LatexEditor (LEd.exe)") + ":").xy(1, 1); // Note the LEd.exe part
-        builder.add(ledPath).xy(3,1);
-        BrowseAction action = BrowseAction.buildForFile(ledPath);
+        builder.add(Localization.lang("Path to %0", getApplicationName()) + ":").xy(1, 1);
+        builder.add(winEdtPath).xy(3, 1);
+        BrowseAction action = BrowseAction.buildForFile(winEdtPath);
         JButton browse = new JButton(Localization.lang("Browse"));
         browse.addActionListener(action);
-        builder.add(browse).xy(5,1);
+        builder.add(browse).xy(5, 1);
         builder.add(Localization.lang("Cite command") + ":").xy(1, 3);
-        builder.add(citeCommand).xy(3,3);
+        builder.add(citeCommand).xy(3, 3);
         settings = builder.build();
     }
 
     @Override
     public void storeSettings() {
-        Globals.prefs.put(JabRefPreferences.LATEX_EDITOR_PATH, ledPath.getText());
-        Globals.prefs.put(JabRefPreferences.CITE_COMMAND_LED, citeCommand.getText());
+        Globals.prefs.put(JabRefPreferences.WIN_EDT_PATH, winEdtPath.getText());
+        Globals.prefs.put(JabRefPreferences.CITE_COMMAND_WIN_EDT, citeCommand.getText());
     }
 }
