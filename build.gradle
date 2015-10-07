@@ -1,5 +1,16 @@
 import org.gradle.internal.os.OperatingSystem
 
+buildscript {
+    repositories {
+        maven {
+            url 'http://maven.ej-technologies.com/repository'
+        }
+    }
+    dependencies {
+        classpath group: 'com.install4j', name: 'gradle-plugin', version: '6.0'
+    }
+}
+
 plugins {
     id 'com.github.johnrengelman.shadow' version '1.2.2'
     id "edu.sc.seis.launch4j" version "1.1.4"
@@ -16,6 +27,18 @@ apply plugin: "sonar-runner"
 apply plugin: "maven"
 apply plugin: 'jacoco'
 apply plugin: 'com.github.kt3k.coveralls'
+
+
+
+apply plugin: 'install4j'
+
+install4j {
+    installDir = file('C:\\Program Files\\install4j6')
+}
+
+task media(type: com.install4j.gradle.Install4jTask, dependsOn: shadowJar) {
+    projectFile = file('jabref.install4j')
+}
 
 group = "net.sf.jabref"
 version = "2.80dev"
