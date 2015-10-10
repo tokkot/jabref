@@ -53,6 +53,8 @@ import net.sf.jabref.gui.fieldeditors.FieldEditor;
 import net.sf.jabref.gui.journals.AbbreviateAction;
 import net.sf.jabref.gui.journals.UnabbreviateAction;
 import net.sf.jabref.gui.labelPattern.SearchFixDuplicateLabels;
+import net.sf.jabref.gui.mergeentries.MergeEntriesDialog;
+import net.sf.jabref.gui.mergeentries.MergeEntryDOIDialog;
 import net.sf.jabref.gui.undo.*;
 import net.sf.jabref.gui.worker.*;
 import net.sf.jabref.importer.AppendDatabaseAction;
@@ -86,7 +88,7 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
-import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.builder.FormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -289,8 +291,6 @@ public class BasePanel extends JPanel implements ClipboardOwner, FileUpdateListe
 
         // The action for opening an entry editor.
         actions.put(Actions.EDIT, (BaseAction) selectionListener::editSignalled);
-
-        actions.put("test", new FindFullTextAction(this));
 
         // The action for saving a database.
         actions.put(Actions.SAVE, saveAction);
@@ -1143,6 +1143,8 @@ public class BasePanel extends JPanel implements ClipboardOwner, FileUpdateListe
             }
         });
 
+        actions.put(Actions.MERGE_DOI, (BaseAction) () -> new MergeEntryDOIDialog(BasePanel.this));
+
         actions.put(Actions.OPEN_SPIRES, new BaseAction() {
 
             @Override
@@ -1358,9 +1360,12 @@ public class BasePanel extends JPanel implements ClipboardOwner, FileUpdateListe
 
         actions.put(Actions.RESOLVE_DUPLICATE_KEYS, new SearchFixDuplicateLabels(this));
 
+
         actions.put(Actions.ADD_TO_GROUP, new GroupAddRemoveDialog(this, true, false));
         actions.put(Actions.REMOVE_FROM_GROUP, new GroupAddRemoveDialog(this, false, false));
         actions.put(Actions.MOVE_TO_GROUP, new GroupAddRemoveDialog(this, true, true));
+
+        actions.put(Actions.DOWNLOAD_FULL_TEXT, new FindFullTextAction(this));
     }
 
     /**
@@ -1374,37 +1379,38 @@ public class BasePanel extends JPanel implements ClipboardOwner, FileUpdateListe
     public void runCommand(String _command) {
         if (actions.get(_command) == null) {
             LOGGER.info("No action defined for '" + _command + '\'');
-        } else {
-            Object o = actions.get(_command);
-            try {
-                if (o instanceof BaseAction) {
-                    ((BaseAction) o).action();
-                } else {
-                    // This part uses Spin's features:
-                    Worker wrk = ((AbstractWorker) o).getWorker();
-                    // The Worker returned by getWorker() has been wrapped
-                    // by Spin.off(), which makes its methods be run in
-                    // a different thread from the EDT.
-                    CallBack clb = ((AbstractWorker) o).getCallBack();
+            return;
+        }
 
-                    ((AbstractWorker) o).init(); // This method runs in this same thread, the EDT.
-                    // Useful for initial GUI actions, like printing a message.
+        Object o = actions.get(_command);
+        try {
+            if (o instanceof BaseAction) {
+                ((BaseAction) o).action();
+            } else {
+                // This part uses Spin's features:
+                Worker wrk = ((AbstractWorker) o).getWorker();
+                // The Worker returned by getWorker() has been wrapped
+                // by Spin.off(), which makes its methods be run in
+                // a different thread from the EDT.
+                CallBack clb = ((AbstractWorker) o).getCallBack();
 
-                    // The CallBack returned by getCallBack() has been wrapped
-                    // by Spin.over(), which makes its methods be run on
-                    // the EDT.
-                    wrk.run(); // Runs the potentially time-consuming action
-                    // without freezing the GUI. The magic is that THIS line
-                    // of execution will not continue until run() is finished.
-                    clb.update(); // Runs the update() method on the EDT.
-                }
-            } catch (Throwable ex) {
-                // If the action has blocked the JabRefFrame before crashing, we need to unblock it.
-                // The call to unblock will simply hide the glasspane, so there is no harm in calling
-                // it even if the frame hasn't been blocked.
-                frame.unblock();
-                ex.printStackTrace();
+                ((AbstractWorker) o).init(); // This method runs in this same thread, the EDT.
+                // Useful for initial GUI actions, like printing a message.
+
+                // The CallBack returned by getCallBack() has been wrapped
+                // by Spin.over(), which makes its methods be run on
+                // the EDT.
+                wrk.run(); // Runs the potentially time-consuming action
+                // without freezing the GUI. The magic is that THIS line
+                // of execution will not continue until run() is finished.
+                clb.update(); // Runs the update() method on the EDT.
             }
+        } catch (Throwable ex) {
+            // If the action has blocked the JabRefFrame before crashing, we need to unblock it.
+            // The call to unblock will simply hide the glasspane, so there is no harm in calling
+            // it even if the frame hasn't been blocked.
+            frame.unblock();
+            LOGGER.error("runCommand error: " + ex.getMessage());
         }
     }
 
@@ -1421,9 +1427,11 @@ public class BasePanel extends JPanel implements ClipboardOwner, FileUpdateListe
             }
 
         } catch (UnsupportedCharsetException ex2) {
+            // @formatter:off
             JOptionPane.showMessageDialog(frame, Localization.lang("Could not save file. "
                             + "Character encoding '%0' is not supported.", encoding),
                     Localization.lang("Save database"), JOptionPane.ERROR_MESSAGE);
+            // @formatter:on
             throw new SaveException("rt");
         } catch (SaveException ex) {
             if (ex.specificEntry()) {
@@ -1451,13 +1459,13 @@ public class BasePanel extends JPanel implements ClipboardOwner, FileUpdateListe
 
         boolean commit = true;
         if (!session.getWriter().couldEncodeAll()) {
-            DefaultFormBuilder builder = new DefaultFormBuilder(new FormLayout("left:pref, 4dlu, fill:pref", ""));
+            FormBuilder builder = FormBuilder.create().layout(new FormLayout("left:pref, 4dlu, fill:pref", "pref, 4dlu, pref"));
             JTextArea ta = new JTextArea(session.getWriter().getProblemCharacters());
             ta.setEditable(false);
-            builder.append(Localization.lang("The chosen encoding '%0' could not encode the following characters: ",
-                    session.getEncoding()));
-            builder.append(ta);
-            builder.append(Localization.lang("What do you want to do?"));
+            builder.add(Localization.lang("The chosen encoding '%0' could not encode the following characters: ",
+                    session.getEncoding())).xy(1, 1);
+            builder.add(ta).xy(3, 1);
+            builder.add(Localization.lang("What do you want to do?")).xy(1, 3);
             String tryDiff = Localization.lang("Try different encoding");
             int answer = JOptionPane.showOptionDialog(frame, builder.getPanel(), Localization.lang("Save database"),
                     JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null,
