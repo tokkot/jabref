@@ -41,7 +41,7 @@ install4j {
     installDir = file(project.ext.install4jDir)
 }
 
-task media(type: com.install4j.gradle.Install4jTask, dependsOn: shadowJar) {
+task media(type: com.install4j.gradle.Install4jTask, dependsOn: "releaseJar") {
     projectFile = file('jabref.install4j')
 
     doLast {
