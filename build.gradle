@@ -27,26 +27,26 @@ apply plugin: "sonar-runner"
 apply plugin: "maven"
 apply plugin: 'jacoco'
 apply plugin: 'com.github.kt3k.coveralls'
-
-
-
 apply plugin: 'install4j'
 
+
+
+group = "net.sf.jabref"
+version = "2.80dev"
+project.ext.threeDotVersion = "2.80.0.0"
+project.ext.install4jDir = hasProperty("install4jDir") ? getProperty("install4jdir") : 'C:\\Program Files\\install4j6'
+project.ext.nsisExec = hasProperty("nsisExec") ? getProperty("nsisExec") : "C:/Program Files/NSIS/makensis.exe"
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+mainClassName = "net.sf.jabref.JabRefMain"
+
 install4j {
-    installDir = file('C:\\Program Files\\install4j6')
+    installDir = file(project.ext.install4jDir)
 }
 
 task media(type: com.install4j.gradle.Install4jTask, dependsOn: shadowJar) {
     projectFile = file('jabref.install4j')
 }
-
-group = "net.sf.jabref"
-version = "2.80dev"
-project.ext.threeDotVersion = "2.80.0.0"
-project.ext.nsisExec = hasProperty("nsisExec") ? getProperty("nsisExec") : "C:/Program Files/NSIS/makensis.exe"
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-mainClassName = "net.sf.jabref.JabRefMain"
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.7'
