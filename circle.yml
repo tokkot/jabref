@@ -13,7 +13,7 @@ dependencies:
     - sudo cp Plugins/x86-ansi/WinShell.dll /usr/share/nsis/Plugins/
     - wget http://download-aws.ej-technologies.com/install4j/install4j_unix_6_0_4.tar.gz
     - tar -xf install4j_unix_6_0_4.tar.gz
-    - install4j/bin/install4j --license=$INSTALL4J_KEY
+    - install4j_unix_6_0_4/bin/install4j --license=$INSTALL4J_KEY
   override:
     - TERM=dumb ./gradlew dependencies
 
