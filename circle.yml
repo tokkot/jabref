@@ -14,7 +14,7 @@ test:
   override:
     - TERM=dumb ./gradlew test
   post:
-    - TERM=dumb export PATH=$PATH:`pwd`/launch4j && ./gradlew -Pdev=true -PnsisExec="install4j6/bin/install4j" release --stacktrace
+    - TERM=dumb export PATH=$PATH:`pwd`/launch4j && ./gradlew -Pdev=true -Pinstall4jDir="install4j6/bin/install4j" release --stacktrace
 
 general:
   artifacts:
