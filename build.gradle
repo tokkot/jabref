@@ -32,7 +32,7 @@ apply plugin: 'install4j'
 group = "net.sf.jabref"
 version = "2.80dev"
 project.ext.threeDotVersion = "2.80.0.0"
-project.ext.install4jDir = hasProperty("install4jDir") ? getProperty("install4jDir") : 'C:/Program Files/install4j6'
+project.ext.install4jDir = hasProperty("install4jDir") ? getProperty("install4jDir") : (OperatingSystem.current().isWindows() ? 'C:/Program Files/install4j6' : 'install4j6')
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 mainClassName = "net.sf.jabref.JabRefMain"
@@ -43,6 +43,13 @@ install4j {
 
 task media(type: com.install4j.gradle.Install4jTask, dependsOn: shadowJar) {
     projectFile = file('jabref.install4j')
+
+    doLast {
+        copy {
+            from "build/install4j"
+            into "build/releases"
+        }
+    }
 }
 
 task wrapper(type: Wrapper) {
@@ -236,8 +243,6 @@ task release(dependsOn: ["media", "releaseJar", "releaseSourceZip", "releaseSour
     group = 'JabRef - Release'
     description 'Creates a release for all target platforms.'
 }
-
-createExe.dependsOn "shadowJar"
 
 task releaseJar(dependsOn: "shadowJar") {
     group = 'JabRef - Release'
