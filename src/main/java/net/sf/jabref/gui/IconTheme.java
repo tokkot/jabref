@@ -3,7 +3,6 @@ package net.sf.jabref.gui;
 import net.sf.jabref.logic.l10n.Localization;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jdesktop.swingx.HorizontalLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +20,7 @@ public class IconTheme {
 
     static {
         try {
-            FONT = Font.createFont(Font.TRUETYPE_FONT, FontBasedIcon.class.getResourceAsStream("/fonts/fontawesome-webfont.ttf"));
+            FONT = Font.createFont(Font.TRUETYPE_FONT, FontBasedIcon.class.getResourceAsStream("/fonts/materialdesignicons-webfont.ttf"));
             FONT_16 = FONT.deriveFont(Font.PLAIN, 16f);
         } catch (FontFormatException | IOException e) {
             // PROBLEM!
@@ -30,15 +29,14 @@ public class IconTheme {
     }
 
     public enum JabRefIcon {
-
-        ADD("\uf067", Color.GREEN),
-        CLIPBOARD("\uf0ea"),
+        ADD("\uf494", Color.GREEN),
+        CLIPBOARD("\uf218"),
         FOLDER("\uf07b"),
-        REMOVE("\uf068", Color.RED),
-        FILE("\uf0f6"),
-        PDF_FILE("\uf1c1"),
-        SEARCH("\uf002"),
-        TAGS("\uf02c");
+        REMOVE("\uf405", Color.RED),
+        FILE("\uf2cf"),
+        PDF_FILE("\uf2dc"),
+        SEARCH("\uf3de"),
+        TAGS("\uf485");
 
         private final String code;
         private final Color color;
@@ -142,7 +140,7 @@ public class IconTheme {
 
     private static final Log LOGGER = LogFactory.getLog(IconTheme.class);
 
-    private static final Map<String, String> KEY_TO_ICON = readIconThemeFile(IconTheme.class.getResource("/images/crystal_16/Icons.properties"), "/images/crystal_16/");
+    private static final Map<String, String> KEY_TO_ICON = readIconThemeFile(IconTheme.class.getResource("/images/Icons.properties"), "/images/crystal_16/");
     private static final String DEFAULT_ICON_PATH = "/images/crystal_16/red.png";
 
     /**
@@ -192,6 +190,7 @@ public class IconTheme {
      *               where icon files are to be found.
      * @return A Map containing all key-value pairs found.
      */
+    // FIXME: prefix can be removed?!
     private static Map<String, String> readIconThemeFile(URL url, String prefix) {
         Objects.requireNonNull(url, "url");
         Objects.requireNonNull(prefix, "prefix");
